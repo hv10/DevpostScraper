@@ -17,27 +17,50 @@ def getSubtitle(subObj, title):
 
 
 def getContent(subObj):
-    if subObj.find("div", {"id": "gallery"}) is None:
-        return subObj.find("div", {"id": "app-details-left"}).find("div").get_text().strip()
-    else:
-        return subObj.find("div", {"id": "gallery"}).parent.findNext("div").get_text().strip()
+    try:
+        if subObj.find("div", {"id": "gallery"}) is None:
+            return (
+                subObj.find("div", {"id": "app-details-left"})
+                .find("div")
+                .get_text()
+                .strip()
+            )
+        else:
+            return (
+                subObj.find("div", {"id": "gallery"})
+                .parent.findNext("div")
+                .get_text()
+                .strip()
+            )
+    except:
+        return ""
 
 
 def getLikes(subObj):
     software_likes = subObj.find("div", {"class": "software-likes"})
-    likes = software_likes.find("span", {"class": "side-count"}).get_text().strip()
+    try:
+        likes = software_likes.find("span", {"class": "side-count"}).get_text().strip()
+    except:
+        likes = 0
     return likes
 
 
 def getUpdates(subObj):
     updateLst = []
     try:
-        updates = subObj.find("div", {"class": "large-12 columns software-updates"}).findAll("article")
+        updates = subObj.find(
+            "div", {"class": "large-12 columns software-updates"}
+        ).findAll("article")
         for update in updates:
             author = update.find("a", {"class": "user-profile-link"})
             author_uname = author["href"].split("/")[-1]
             when = update.find("time", {"class": "timeago"})["datetime"]
-            content = update.find("p", {"class": "author small"}).find_next_sibling("p", class_="").get_text().strip()
+            content = (
+                update.find("p", {"class": "author small"})
+                .find_next_sibling("p", class_="")
+                .get_text()
+                .strip()
+            )
             updateLst.append([author_uname, content, when])
     except:
         print("No Updates found.")
@@ -60,7 +83,9 @@ def getParticipants(subObj):
 def getSkills(userObj):
     skills = []
     try:
-        skillObjs = userObj.find("ul", class_="portfolio-tags no-bullet inline-list").findAll("li")
+        skillObjs = userObj.find(
+            "ul", class_="portfolio-tags no-bullet inline-list"
+        ).findAll("li")
         for skillObj in skillObjs:
             skills.append(skillObj.get_text().strip())
     except:
@@ -71,9 +96,11 @@ def getSkills(userObj):
 def getinterests(userObj):
     interests = []
     try:
-        interObjs = userObj.find("div", class_="tag-list themes clearfix").find("ul",
-                                                                                class_="no-bullet inline-list").findAll(
-            "li")
+        interObjs = (
+            userObj.find("div", class_="tag-list themes clearfix")
+            .find("ul", class_="no-bullet inline-list")
+            .findAll("li")
+        )
         for interObj in interObjs:
             interests.append(interObj.get_text().strip())
     except:
@@ -84,7 +111,9 @@ def getinterests(userObj):
 def getUserData(uname):
     url = "https://devpost.com/" + uname
     userObj = BeautifulSoup(urlopen(url), "html.parser")
-    natural_name = userObj.find("h1", id="portfolio-user-name").get_text().strip().split("\n")[0]
+    natural_name = (
+        userObj.find("h1", id="portfolio-user-name").get_text().strip().split("\n")[0]
+    )
     image = userObj.find("div", id="portfolio-user-photo").find("img")["src"]
     skills = getSkills(userObj)
     interests = getinterests(userObj)
